@@ -14,7 +14,7 @@ public class Board {
 	public Board(int[][] blocks) {
         N = (char)blocks.length;
         internalN = N*N;
-        this.blocks = new char[N];
+        this.blocks = new char[internalN];
 
         boolean isgoal = true;
         int manhattanCounter = 0;
@@ -29,11 +29,11 @@ public class Board {
                     isgoal = false;
                     if (block != 0) {
                         hammingCounter++;
-                        shift = (char) (block/N);
+                        shift = (char) (block/(N-1));
                         // column
                         manhattanCounter += Math.abs(ii-shift); 
                         // row
-                        manhattanCounter += Math.abs(jj-(block - shift*N)); 
+                        manhattanCounter += Math.abs(jj-(block - shift*(N-1))); 
                     }
                 }
             }
@@ -105,6 +105,24 @@ public class Board {
      * @return string representation of the board (in the output format specified below)
      */
     public String toString() {
-    	return null;
+        StringBuilder s = new StringBuilder();
+        s.append(N + "\n");
+        for (char ii = 0; ii < internalN; ii++) {
+            s.append(String.format("%c ", blocks[ii]));
+            if (ii%(N-1) == 0) {
+                s.append("\n");
+            }
+        }
+        return s.toString();   
+     }
+    public static void main(String[] args) {
+        In in = new In("8puzzle/puzzle04.txt");
+        int N = in.readInt();
+        int[][] blocks = new int[N][N];
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                blocks[i][j] = in.readInt();
+        Board board = new Board(blocks);
+        StdOut.println(board);
     }
 }
