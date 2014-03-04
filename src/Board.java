@@ -1,17 +1,19 @@
+import java.util.Arrays;
+
 public class Board {
-	private short[] blocks;
-	private final short N;
-	private final short internalN;
-	private final boolean isGoal;
-	private final short hamming;
-	private final int manhattan;
-	
+    private short[] blocks;
+    private final short N;
+    private final short internalN;
+    private final boolean isGoal;
+    private final short hamming;
+    private final int manhattan;
+
     /**
      * construct a board from an N-by-N array of blocks
      * (where blocks[i][j] = block in row i, column j)
      * @param blocks
      */
-	public Board(int[][] blocks) {
+    public Board(int[][] blocks) {
         N = (short) blocks.length;
         internalN = (short) (N*N);
         this.blocks = new short[internalN];
@@ -43,29 +45,75 @@ public class Board {
         manhattan = manhattanCounter;
     }
 
+    private void exch(short i, short j) {
+        short tmp = this.blocks[i];
+        this.blocks[i] = this.blocks[j];
+        this.blocks[j] = tmp;
+    }
+
+    private short getX(short number) {
+        return (short) ((number-1)%N);
+    }
+
+    private Board(Board board, boolean twin) {
+        N = board.N;
+        internalN = board.internalN;
+        this.blocks = new short[internalN];
+
+        boolean isgoal = board.isgoal;
+        int manhattanCounter = 0;
+        short hammingCounter = 0;
+        short block;
+        short shift;
+        this.blocks = Arrays.copyOf(board.blocks, internalN);
+        if (N >1) {
+            exch((short)0, (short)1);
+            isgoal = if () {
+                
+            }
+            for (short ii = 0; ii < internalN; ii++) {
+                if (blocks[ii] != (ii+1)) {
+                    isgoal = false;
+                    if (block != 0) {
+                        hammingCounter++;
+                        shift = (short) ((block)/(N+1));
+                        // column
+                        manhattanCounter += Math.abs(ii-shift); 
+                        // row
+                        manhattanCounter += Math.abs(jj-(block - shift*(N) - 1)); 
+                    }
+                }
+            }
+        }
+
+        isGoal = isgoal;
+        this.hamming = hammingCounter;
+        this.manhattan = manhattanCounter;
+    }
+
     private void put(short i, short j, short e) {
         blocks[(i) * N + j] = e;
     }
-    
-    private short get(short i, short j) {
-        return blocks[(i) * N + j];
-    }
-    
-	/**
-	 * board dimension N
-	 * @return
-	 */
+
+//    private short get(short i, short j) {
+//        return blocks[(i) * N + j];
+//    }
+
+    /**
+     * board dimension N
+     * @return
+     */
     public int dimension() {
-    	return N;
+        return N;
     }
-    
+
     /**
      * @return number of blocks out of place
      */
     public int hamming() {
-    	return hamming;
+        return hamming;
     }
-    
+
     /**
      * @return sum of Manhattan distances between blocks and goal
      */
@@ -79,28 +127,43 @@ public class Board {
     public boolean isGoal() {
     	return isGoal;
     }
-    
+
     /**
      * @return a board obtained by exchanging two adjacent blocks in the same row
      */
     public Board twin() {
     	return null;
     }
-    
+
     /**
      * @return does this board equal y?
      */
     public boolean equals(Object y) {
-    	return false;
+        if (this == y) {
+            return false;
+        }
+
+        Board b = (Board) y;
+        if (this.N != b.N) {
+            return false;
+        } else if (this.isGoal != b.isGoal) {
+        	return false;
+        } else if (this.hamming != b.hamming) {
+        	return false;
+        } else if (this.manhattan != b.manhattan) {
+        	return false;
+        }
+
+        return Arrays.equals(this.blocks, b.blocks);
     }
-    
+
     /**
      * @return all neighboring boards
      */
     public Iterable<Board> neighbors() {
     	return null;
     }
-    
+
     /**
      * @return string representation of the board (in the output format specified below)
      */
@@ -115,6 +178,7 @@ public class Board {
         }
         return s.toString();   
      }
+
     public static void main(String[] args) {
         In in = new In("8puzzle/puzzle04.txt");
         int N = in.readInt();
