@@ -4,7 +4,6 @@ public class Board {
     private short[] blocks;
     private final short N;
     private final short internalN;
-    private final boolean isGoal;
     private final short hamming;
     private final int manhattan;
 
@@ -18,7 +17,6 @@ public class Board {
         internalN = (short) (N*N);
         this.blocks = new short[internalN];
 
-        boolean isgoal = true;
         int manhattanCounter = 0;
         short hammingCounter = 0;
         short block;
@@ -28,7 +26,6 @@ public class Board {
                 block = (short)blocks[ii][jj];
                 put(ii, jj, block);
                 if (block != (ii*N+jj+1)) {
-                    isgoal = false;
                     if (block != 0) {
                         hammingCounter++;
                         shift = (short) ((block)/(N+1));
@@ -40,7 +37,6 @@ public class Board {
                 }
             }
         }
-        isGoal = isgoal;
         hamming = hammingCounter;
         manhattan = manhattanCounter;
     }
@@ -51,42 +47,28 @@ public class Board {
         this.blocks[j] = tmp;
     }
 
-    private short getX(short number) {
-        return (short) ((number-1)%N);
-    }
-
-    private Board(Board board, boolean twin) {
+    private Board(Board board) {
         N = board.N;
         internalN = board.internalN;
         this.blocks = new short[internalN];
 
-        boolean isgoal = board.isgoal;
         int manhattanCounter = 0;
         short hammingCounter = 0;
-        short block;
-        short shift;
         this.blocks = Arrays.copyOf(board.blocks, internalN);
         if (N >1) {
             exch((short)0, (short)1);
-            isgoal = if () {
-                
-            }
-            for (short ii = 0; ii < internalN; ii++) {
-                if (blocks[ii] != (ii+1)) {
-                    isgoal = false;
-                    if (block != 0) {
-                        hammingCounter++;
-                        shift = (short) ((block)/(N+1));
-                        // column
-                        manhattanCounter += Math.abs(ii-shift); 
-                        // row
-                        manhattanCounter += Math.abs(jj-(block - shift*(N) - 1)); 
-                    }
+            if (board.hamming == 0) {
+                hammingCounter = 2;
+                manhattanCounter = 2;
+            } else {
+                if (this.blocks[0] != 1) {
+                    
+                }
+                if (this.blocks[1] != 2) {
                 }
             }
         }
 
-        isGoal = isgoal;
         this.hamming = hammingCounter;
         this.manhattan = manhattanCounter;
     }
@@ -125,7 +107,7 @@ public class Board {
      * @return is this board the goal board?
      */
     public boolean isGoal() {
-    	return isGoal;
+    	return hamming == 0;
     }
 
     /**
