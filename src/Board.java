@@ -1,9 +1,9 @@
 public class Board {
-	private char[] blocks;
-	private final char N;
-	private final int internalN;
+	private short[] blocks;
+	private final short N;
+	private final short internalN;
 	private final boolean isGoal;
-	private final char hamming;
+	private final short hamming;
 	private final int manhattan;
 	
     /**
@@ -12,28 +12,28 @@ public class Board {
      * @param blocks
      */
 	public Board(int[][] blocks) {
-        N = (char)blocks.length;
-        internalN = N*N;
-        this.blocks = new char[internalN];
+        N = (short) blocks.length;
+        internalN = (short) (N*N);
+        this.blocks = new short[internalN];
 
         boolean isgoal = true;
         int manhattanCounter = 0;
-        char hammingCounter = 0;
-        char block;
-        char shift;
-        for (char ii = 0; ii < N; ii++) {
-            for (char jj = 0; jj < N; jj++) {
-                block = (char)blocks[ii][jj];
+        short hammingCounter = 0;
+        short block;
+        short shift;
+        for (short ii = 0; ii < N; ii++) {
+            for (short jj = 0; jj < N; jj++) {
+                block = (short)blocks[ii][jj];
                 put(ii, jj, block);
                 if (block != (ii*N+jj+1)) {
                     isgoal = false;
                     if (block != 0) {
                         hammingCounter++;
-                        shift = (char) (block/(N-1));
+                        shift = (short) ((block)/(N+1));
                         // column
                         manhattanCounter += Math.abs(ii-shift); 
                         // row
-                        manhattanCounter += Math.abs(jj-(block - shift*(N-1))); 
+                        manhattanCounter += Math.abs(jj-(block - shift*(N) - 1)); 
                     }
                 }
             }
@@ -43,11 +43,11 @@ public class Board {
         manhattan = manhattanCounter;
     }
 
-    private void put(char i, char j, char e) {
+    private void put(short i, short j, short e) {
         blocks[(i) * N + j] = e;
     }
     
-    private char get(char i, char j) {
+    private short get(short i, short j) {
         return blocks[(i) * N + j];
     }
     
@@ -107,9 +107,9 @@ public class Board {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append(N + "\n");
-        for (char ii = 0; ii < internalN; ii++) {
-            s.append(String.format("%c ", blocks[ii]));
-            if (ii%(N-1) == 0) {
+        for (short ii = 0; ii < internalN; ii++) {
+            s.append(String.format("%h ", blocks[ii]));
+            if ((ii+1)%(N) == 0) {
                 s.append("\n");
             }
         }
