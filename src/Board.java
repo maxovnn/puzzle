@@ -84,7 +84,9 @@ public class Board {
                 hammingMod--;
                 manhattanMod--;
             } else {
-                hammingMod++;
+                if (blocks[arrayIndNew] == (arrayIndOld+1)) {
+                    hammingMod++;
+                }
                 manhattanMod -= calcManhattanDist(i, j, blocks.length, blocks[arrayIndNew]);
                 manhattanMod += calcManhattanDist(iN, jN, blocks.length, blocks[arrayIndNew]);
             }
@@ -92,6 +94,9 @@ public class Board {
                 hammingMod--;
                 manhattanMod--;
             } else {
+                if (blocks[arrayIndOld] == (arrayIndNew+1)) {
+                    hammingMod++;
+                }
                 hammingMod++;
                 manhattanMod -= calcManhattanDist(iN, jN, blocks.length, blocks[arrayIndOld]);
                 manhattanMod += calcManhattanDist(i, j, blocks.length, blocks[arrayIndOld]);
