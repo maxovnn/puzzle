@@ -165,9 +165,9 @@ public class Board {
      * @return does this board equal y?
      */
     public boolean equals(Object y) {
-        if (this == y) {
-            return true;
-        }
+        if (this == y) return true;
+        if (y == null) return false;
+        if (y.getClass() != this.getClass()) return false;
 
         Board b = (Board) y;
         if (this.N != b.N) {
