@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class Board {
     private short[] blocks;
@@ -51,7 +52,7 @@ public class Board {
         int hammingCounter = board.hamming;
         this.blocks = Arrays.copyOf(board.blocks, internalN);
         if (N >1) {
-            int[] result = move(this.blocks, i, j , iN, jN, board.hamming, board.manhattan);
+            int[] result = move(this.blocks, N, i, j , iN, jN, board.hamming, board.manhattan);
             hammingCounter = result[0];
             manhattanCounter = result[1];
         }
@@ -67,7 +68,7 @@ public class Board {
         return manhattenCounter;
     }
     
-    private static int[] move(short[] blocks, int i, int j, int iN, int jN, int hamming, int manhattan) {
+    private static int[] move(short[] blocks, int dimension, int i, int j, int iN, int jN, int hamming, int manhattan) {
         int manhattanMod = manhattan;
         int hammingMod = hamming;
         int arrayIndOld = (i) * blocks.length + j; 
@@ -87,8 +88,8 @@ public class Board {
                 if (blocks[arrayIndNew] == (arrayIndOld+1)) {
                     hammingMod++;
                 }
-                manhattanMod -= calcManhattanDist(i, j, blocks.length, blocks[arrayIndNew]);
-                manhattanMod += calcManhattanDist(iN, jN, blocks.length, blocks[arrayIndNew]);
+                manhattanMod -= calcManhattanDist(i, j, dimension, blocks[arrayIndNew]);
+                manhattanMod += calcManhattanDist(iN, jN, dimension, blocks[arrayIndNew]);
             }
             if (blocks[arrayIndOld] == (arrayIndOld+1)) {
                 hammingMod--;
@@ -169,7 +170,40 @@ public class Board {
      * @return all neighboring boards
      */
     public Iterable<Board> neighbors() {
-    	return null;
+    	return new BoardItterable();
+    }
+
+    private class BoardItterable implements Iterable<Board> {
+
+        @Override
+        public Iterator<Board> iterator() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        private class BoardIterator implements Iterator<Board> {
+
+            @Override
+            public boolean hasNext() {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
+            @Override
+            public Board next() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void remove() {
+                // TODO Auto-generated method stub
+                
+            }
+            
+        }
+
+        
     }
 
     /**
@@ -185,7 +219,7 @@ public class Board {
             }
         }
         return s.toString();   
-     }
+    }
 
     public static void main(String[] args) {
         In in = new In("8puzzle/puzzle05.txt");
