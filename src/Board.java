@@ -7,6 +7,8 @@ public class Board {
     private final short internalN;
     private final int hamming;
     private final int manhattan;
+    private int blankIndexI;
+    private int blankIndexJ;
 
     /**
      * construct a board from an N-by-N array of blocks
@@ -25,11 +27,14 @@ public class Board {
             for (int jj = 0; jj < N; jj++) {
                 block = (short)blocks[ii][jj];
                 put(ii, jj, block);
+                if (block == 0) {
+                    blankIndexI = ii;
+                    blankIndexJ = jj;
+                    continue;
+                }
                 if (block != (ii*N+jj+1)) {
-                    if (block != 0) {
-                        hammingCounter++;
-                        manhattanCounter += calcManhattanDist(ii, jj, N, block); 
-                    }
+                    hammingCounter++;
+                    manhattanCounter += calcManhattanDist(ii, jj, N, block); 
                 }
             }
         }
@@ -37,7 +42,7 @@ public class Board {
         manhattan = manhattanCounter;
     }
 
-    private static void exch(short[] blocks, int i, int j) {
+    private void exch(short[] blocks, int i, int j) {
         short tmp = blocks[i];
         blocks[i] = blocks[j];
         blocks[j] = tmp;
@@ -52,7 +57,7 @@ public class Board {
         int hammingCounter = board.hamming;
         this.blocks = Arrays.copyOf(board.blocks, internalN);
         if (N >1) {
-            int[] result = move(this.blocks, N, i, j , iN, jN, board.hamming, board.manhattan);
+            int[] result = move(this.blocks, N, i, j, iN, jN, board.hamming, board.manhattan);
             hammingCounter = result[0];
             manhattanCounter = result[1];
         }
@@ -61,18 +66,19 @@ public class Board {
         this.manhattan = manhattanCounter;
     }
 
-    private static int calcManhattanDist(int i, int j, int dimension, short target) {
-        int shift = target/(dimension+1);
-        int manhattenCounter = Math.abs(i-shift);
-        manhattenCounter += Math.abs(j-(target - shift*(dimension) - 1));
+    private int calcManhattanDist(int i, int j, int dimension, short target) {
+        int x = target%dimension;
+        int y = target/dimension;
+        int manhattenCounter = Math.abs(i-y);
+        manhattenCounter += Math.abs(j-x);
         return manhattenCounter;
     }
     
-    private static int[] move(short[] blocks, int dimension, int i, int j, int iN, int jN, int hamming, int manhattan) {
+    private int[] move(short[] blocks, int dimension, int i, int j, int iN, int jN, int hamming, int manhattan) {
         int manhattanMod = manhattan;
         int hammingMod = hamming;
-        int arrayIndOld = (i) * blocks.length + j; 
-        int arrayIndNew = (iN) * blocks.length + jN;
+        int arrayIndOld = (i) * dimension + j; 
+        int arrayIndNew = (iN) * dimension + jN;
 
         // simple exchange
         exch(blocks, arrayIndOld, arrayIndNew);
@@ -81,26 +87,35 @@ public class Board {
             hammingMod = 2;
             manhattanMod = 2;
         } else {
-            if (blocks[arrayIndNew] == (arrayIndNew+1)) {
-                hammingMod--;
-                manhattanMod--;
+            if (blocks[arrayIndNew] == 0) {
+                blankIndexI = iN;
+                blankIndexJ = jN;
             } else {
-                if (blocks[arrayIndNew] == (arrayIndOld+1)) {
-                    hammingMod++;
+                if (blocks[arrayIndNew] == (arrayIndNew+1)) {
+                    hammingMod--;
+                    manhattanMod--;
+                } else {
+                    if (blocks[arrayIndNew] == (arrayIndOld+1)) {
+                        hammingMod++;
+                    }
+                    manhattanMod -= calcManhattanDist(i, j, dimension, blocks[arrayIndNew]);
+                    manhattanMod += calcManhattanDist(iN, jN, dimension, blocks[arrayIndNew]);
                 }
-                manhattanMod -= calcManhattanDist(i, j, dimension, blocks[arrayIndNew]);
-                manhattanMod += calcManhattanDist(iN, jN, dimension, blocks[arrayIndNew]);
             }
-            if (blocks[arrayIndOld] == (arrayIndOld+1)) {
-                hammingMod--;
-                manhattanMod--;
+            if (blocks[arrayIndOld] == 0) {
+                blankIndexI = i;
+                blankIndexJ = j;
             } else {
-                if (blocks[arrayIndOld] == (arrayIndNew+1)) {
-                    hammingMod++;
+                if (blocks[arrayIndOld] == (arrayIndOld+1)) {
+                    hammingMod--;
+                    manhattanMod--;
+                } else {
+                    if (blocks[arrayIndOld] == (arrayIndNew+1)) {
+                        hammingMod++;
+                    }
+                    manhattanMod -= calcManhattanDist(iN, jN, dimension, blocks[arrayIndOld]);
+                    manhattanMod += calcManhattanDist(i, j, dimension, blocks[arrayIndOld]);
                 }
-                hammingMod++;
-                manhattanMod -= calcManhattanDist(iN, jN, blocks.length, blocks[arrayIndOld]);
-                manhattanMod += calcManhattanDist(i, j, blocks.length, blocks[arrayIndOld]);
             }
         }
         return new int[]{hammingMod, manhattanMod};
@@ -170,40 +185,58 @@ public class Board {
      * @return all neighboring boards
      */
     public Iterable<Board> neighbors() {
-    	return new BoardItterable();
+    	return new BoardItterable(this);
     }
 
     private class BoardItterable implements Iterable<Board> {
+        private final Board board;
+        BoardItterable(Board board) {
+            this.board = board;
+        }
 
         @Override
         public Iterator<Board> iterator() {
             // TODO Auto-generated method stub
-            return null;
+            return new BoardIterator(board);
         }
 
         private class BoardIterator implements Iterator<Board> {
+            private Board[] items;
+            private int current;
+
+            BoardIterator(Board board) {
+                items = new Board[4];
+                final int blankIndexI = board.blankIndexI;
+                final int blankIndexJ = board.blankIndexJ;
+                if ((board.blankIndexI + 1) != board.N) {
+                    items[current++] = new Board(board, blankIndexI, blankIndexJ, blankIndexI+1, blankIndexJ);
+                }
+                if (blankIndexI != 0) {
+                    items[current++] = new Board(board, blankIndexI, blankIndexJ, blankIndexI-1, blankIndexJ);
+                }
+                if ((blankIndexJ + 1) != board.N) {
+                    items[current++] = new Board(board, blankIndexI, blankIndexJ, blankIndexI, blankIndexJ+1);
+                }
+                if (blankIndexJ != 0) {
+                    items[current++] = new Board(board, blankIndexI, blankIndexJ, blankIndexI-1, blankIndexJ-1);
+                }
+            }
 
             @Override
             public boolean hasNext() {
-                // TODO Auto-generated method stub
-                return false;
+                return current > 0;
             }
 
             @Override
             public Board next() {
-                // TODO Auto-generated method stub
-                return null;
+                return items[--current];
             }
 
             @Override
             public void remove() {
-                // TODO Auto-generated method stub
-                
+                throw new UnsupportedOperationException();
             }
-            
         }
-
-        
     }
 
     /**
@@ -222,7 +255,7 @@ public class Board {
     }
 
     public static void main(String[] args) {
-        In in = new In("8puzzle/puzzle05.txt");
+/*        In in = new In("8puzzle/puzzle04.txt");
         int N = in.readInt();
         int[][] blocks = new int[N][N];
         for (int i = 0; i < N; i++)
@@ -232,10 +265,17 @@ public class Board {
         StdOut.println(board);
         StdOut.println("manhattan - " + board.manhattan());
         StdOut.println("hamming   - " + board.hamming());
-        StdOut.println("--------");
+        StdOut.println("-------- Twin");
         Board board1 = board.twin();
         StdOut.println(board1);
         StdOut.println("manhattan - " + board1.manhattan());
         StdOut.println("hamming   - " + board1.hamming());
+        StdOut.println("-------- Neighbors");
+        for (Board neigh: board.neighbors()) {
+            StdOut.println(neigh);
+            StdOut.println("manhattan - " + neigh.manhattan());
+            StdOut.println("hamming   - " + neigh.hamming());
+            StdOut.println("--");
+        }*/
     }
 }
